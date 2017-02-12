@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Reader, Relay, Location, Access_group, Event, Action
+from .models import Reader, Relay, Location, Access_group, Event, Action, Cardholder
 # Register your models here.
 
 admin.site.register(Reader)
@@ -8,3 +8,4 @@ admin.site.register(Location)
 admin.site.register(Access_group)
 admin.site.register(Event)
 admin.site.register(Action)
+admin.site.register(Cardholder)

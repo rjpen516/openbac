@@ -1,6 +1,12 @@
 from django.db import models
 
 # Create your models here.
+from enum import Enum
+
+class CardTypeEnum(Enum):
+    PIV_CARD = 1
+    PROX_PRO = 2
+
 
 
 class Location(models.Model):
@@ -47,9 +53,23 @@ class Access_group(models.Model):
     reader = models.ForeignKey(Reader)
     action = models.ForeignKey(Action)
 
+class Cardholder(models.Model):
+    firstname = models.CharField(max_length=50)
+    lastname = models.TextField(max_length=50)
+    card_id = models.TextField()
+    card_id_type = models.IntegerField()
+    locations_allowed = models.ManyToManyField(Location)
+
+    def __str__(self):
+        return self.firstname + " " + self.lastname + " " + self.card_id
+
 
 class Event(models.Model):
     time = models.DateTimeField()
     reader = models.ForeignKey(Reader)
     relay = models.ForeignKey(Relay)
     action_taken = models.ForeignKey(Action)
+    card_holder = models.ForeignKey(Cardholder, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.card_holder) + " accessed " + str(self.reader) + " at " + str(self.time)

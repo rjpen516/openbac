@@ -3,3 +3,8 @@ import datetime
 
 class AuthSerializer(serializers.Serializer):
     id = serializers.CharField(max_length=150)
+
+
+class ResponseSerializer(serializers.Serializer):
+    auth_decision = serializers.BooleanField()
+    led_color = serializers.CharField(max_length=50)
