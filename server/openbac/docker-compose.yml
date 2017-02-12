@@ -57,3 +57,12 @@ services:
       - redis
     command: celery -A openbac.taskapp beat -l INFO
 
+
+  rabbitmq:
+    build:
+      context:
+        dockerfile: ./compose/django/dockerfile
+    user: django
+    env_file: .env
+    ports:
+     - "15672:15672"
