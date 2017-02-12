@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
 
-    url(r'deviceAuth/$', views.Auth_request.as_view(), name='Device Auth')
+    url(r'cardauthrequest/$', views.Auth_request.as_view(), name='Card Auth Request from Reader to Cloud'),
+    url(r'readerRegistratonRequest/$', views.ReaderBootstrap.as_view(), name='reader client bootstrap')
 
 ]

@@ -5,8 +5,12 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import permissions
+from rest_framework import generics
 
-from .serializers import AuthSerializer, ResponseSerializer
+from .serializers import AuthSerializer, ResponseSerializer, ReaderBootstrapSerializer
+from .permissions import IsSuperUserFullOrAnyonePost
+from .models import UnregisteredDevice
 
 from openbac.bac.models import Event, Relay, Action, Cardholder
 
@@ -50,3 +54,8 @@ class Auth_request(APIView):
 
             return_data.is_valid()
             return Response(return_data.data, status=status.HTTP_202_ACCEPTED)
+
+class ReaderBootstrap(generics.CreateAPIView):
+    queryset = UnregisteredDevice.objects.all()
+    serializer_class = ReaderBootstrapSerializer
+    permission_classes = (IsSuperUserFullOrAnyonePost,)
