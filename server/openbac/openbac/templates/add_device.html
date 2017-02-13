@@ -5,9 +5,9 @@
 <form action="" method="post">{% csrf_token %}
     <p>Lets add a new device</p>
 
-    <ul>{{ queryset|unordered_list }}</ul>
+    The device to register - <p>{{ queryset }}</p>
 
-
+    Type of device -
     <select name='type'>
       <option value="reader">Reader</option>
       <option value="relay">Relay</option>
@@ -15,12 +15,15 @@
 
     <div>
 
-    {% for obj in queryset %}
-    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}" />
-    {% endfor %}
-    <input type="hidden" name="action" value="admin_action" />
-    <input type="hidden" name="post" value="yes" />
-    <input type="submit" value="{% trans "Yes, I'm sure" %}" />
+    Name -  <input type="text" name="name"> <br><br>
+    Location -  <select name='location'> <br>
+      {% for location in locations %}
+        <option value="{{ location.id }}"> {{location}} </option>
+     {% endfor %}
+   </select>
+   <br>
+    <input type="hidden" value=post name=post />
+    <input type="submit" value="{% trans "Create Device" %}" />
     </div>
 </form>
 {% endblock %}

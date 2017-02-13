@@ -31,7 +31,7 @@ class Reader(models.Model):
     location =models.ForeignKey(Location)
     ipaddr = models.TextField(blank=True)
     install_date = models.TextField(blank=True)
-    mac = models.CharField(max_length=50)
+    mac = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return self.name + " - " + str(self.location)
@@ -42,8 +42,8 @@ class Relay(models.Model):
     ipaddr = models.TextField(blank=True)
     install_date = models.TextField(blank=True)
     action = models.ForeignKey(Action)
-    paired_reader = models.ForeignKey(Reader)
-    mac = models.CharField(max_length=50)
+    paired_reader = models.ForeignKey(Reader, blank=True)
+    mac = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return self.name + " relay is attacked to " + str(self.paired_reader.name) + " @ " + str(self.location)
