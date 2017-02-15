@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import helpers
 from django.template.response import TemplateResponse
+from django.template import RequestContext
 from .models import UnregisteredDevice
 from openbac.bac.models import Location, Reader, Relay
 # Register your models here.
-
+from django import forms
+from django.shortcuts import render_to_response
 import datetime
 
 
@@ -13,7 +15,7 @@ class UnregisteredDeviceAdmin(admin.ModelAdmin):
 
     def convert_unregistered_to_reg(self, request, queryset):
         print "Doing shit"
-        if request.POST.get('post'):
+        if 'apply' in request.POST:
                 # process the queryset here
                 ty = request.POST['type']
                 name = request.POST['name']
@@ -31,6 +33,9 @@ class UnregisteredDeviceAdmin(admin.ModelAdmin):
                 new_obj.name = name
                 new_obj.mac = queryset[0]
                 new_obj.save()
+                self.message_user(request, "Successfully Created Device")
+                return HttpResponseRedirect(request.get_full_path())
+
         else:
             locations = Location.objects.all()
             context = {
@@ -39,8 +44,8 @@ class UnregisteredDeviceAdmin(admin.ModelAdmin):
                 'locations': locations,
                 'action_checkbox_name': helpers.ACTION_CHECKBOX_NAME,
             }
-            return TemplateResponse(request, 'add_device.html',
-                context)
+            return render_to_response('add_device.html',
+                context=context)
 
     convert_unregistered_to_reg.short_description = "Register Device"
     actions = [convert_unregistered_to_reg]

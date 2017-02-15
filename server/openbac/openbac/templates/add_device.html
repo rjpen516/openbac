@@ -23,7 +23,8 @@
    </select>
    <br>
     <input type="hidden" value=post name=post />
-    <input type="submit" value="{% trans "Create Device" %}" />
+      <input type="hidden" name="action" value="convert_unregistered_to_reg" />
+    <input type="submit" name="apply" value="Create Device" />
     </div>
 </form>
 {% endblock %}
