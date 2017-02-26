@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework import generics
 
-from .serializers import AuthSerializer, ResponseSerializer, ReaderBootstrapSerializer
+from .serializers import AuthSerializer, ResponseSerializer, ReaderBootstrapSerializer, RelayAckSerializer, RelayResponse
 from .permissions import IsSuperUserFullOrAnyonePost
 from .models import UnregisteredDevice
 
@@ -38,9 +38,12 @@ class Auth_request(APIView):
             event.relay = Relay.objects.get(paired_reader=request.user.reader.id)
             if cardholder:
 
-                event.cardholder = cardholder
-                event.action_taken = event.relay.action
-                event.save()
+                token = event.create_transation(cardholder,event.relay.action, request.user.reader, Relay.objects.get(paired_reader=request.user.reader.id))
+
+                #call rabitmq to notify our relay with the token
+                print("Notifing %s with token %s"%(event.relay, token))
+
+
                 return_data = ResponseSerializer(data={'auth_decision': True, 'led_color': "green"})
             else:
                 event.action_taken = event.relay.action
@@ -54,6 +57,28 @@ class Auth_request(APIView):
 
             return_data.is_valid()
             return Response(return_data.data, status=status.HTTP_202_ACCEPTED)
+
+
+class Relay_ack(APIView):
+    serializer_class = RelayAckSerializer
+    def post(self, request, format=None):
+        serializer = RelayAckSerializer(data=request.data)
+        if serializer.is_valid():
+            parsed_data = serializer.data
+
+            #lets look up an event token, see if it is valid, and not to far from our requeset time
+            event = Event.objects.get(token=parsed_data['token'])
+            #print  str(event.relay.id) + " " + str(request.user.id)
+            if event and event.relay.id == request.user.id and event.expired == False:  #TODO add timechecking
+                event.expired = True
+                event.save()
+                return_data = RelayResponse(data={'seconds_open': event.action_taken.open_time, 'unlock': True})
+            else:
+                return_data = RelayResponse(data={'seconds_open': 0, 'unlock': False})
+
+            return_data.is_valid()
+            return Response(return_data.data, status=status.HTTP_202_ACCEPTED)
+
 
 class ReaderBootstrap(generics.CreateAPIView):
     queryset = UnregisteredDevice.objects.all()

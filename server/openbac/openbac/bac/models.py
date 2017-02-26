@@ -2,6 +2,8 @@ from django.db import models
 
 # Create your models here.
 from enum import Enum
+from django.utils.crypto import get_random_string
+import datetime
 
 class CardTypeEnum(Enum):
     PIV_CARD = 1
@@ -72,6 +74,19 @@ class Event(models.Model):
     relay = models.ForeignKey(Relay)
     action_taken = models.ForeignKey(Action)
     card_holder = models.ForeignKey(Cardholder, null=True, blank=True)
+    token = models.CharField(max_length=200)
+    expired = models.BooleanField(default=False)
+
+    def create_transation(self, cardholder, action, reader, relay):
+        self.card_holder = cardholder
+        self.action_taken = action
+        self.token = get_random_string(length=32)
+        self.reader = reader
+        self.relay = relay
+        self.time = datetime.datetime.now()
+        self.save()
+        return self.token
+
 
     def __str__(self):
         return str(self.card_holder) + " accessed " + str(self.reader) + " at " + str(self.time)
