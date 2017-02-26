@@ -14,11 +14,17 @@ from .models import UnregisteredDevice
 
 from openbac.bac.models import Event, Relay, Action, Cardholder
 
+from django.utils.crypto import get_random_string
+
 # Create your views here.
 
 class Auth_request(APIView):
 
     serializer_class = AuthSerializer
+
+    def get(self,request,format=None):
+        return Response(data={'piv_token': get_random_string(32)})
+
     def post(self, request, format=None):
         serializer = AuthSerializer(data=request.data)
         print serializer
@@ -26,6 +32,9 @@ class Auth_request(APIView):
 
             parsed_data = serializer.data
             card_id = parsed_data['card_id']
+
+            if parsed_data['piv_token_signed']: #TODO - check to see if the reader is PIV enabled, if so we should force PIV for the transation. 
+                print "We got a PIV card, use public key to verify rather than card id"
 
             try:
                 cardholder = Cardholder.objects.get(card_id=card_id)

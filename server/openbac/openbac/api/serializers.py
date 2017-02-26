@@ -4,6 +4,7 @@ from .models import UnregisteredDevice
 
 class AuthSerializer(serializers.Serializer):
     card_id = serializers.CharField(max_length=150)
+    piv_token_signed = serializers.CharField(max_length=300, allow_blank=True)
 
 
 class ResponseSerializer(serializers.Serializer):
