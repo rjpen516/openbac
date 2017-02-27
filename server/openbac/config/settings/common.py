@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 from __future__ import absolute_import, unicode_literals
 
 import environ
+import datetime
 
 ROOT_DIR = environ.Path(__file__) - 3  # (openbac/config/settings/common.py - 3 = openbac/)
 APPS_DIR = ROOT_DIR.path('openbac')
@@ -55,6 +56,9 @@ THIRD_PARTY_APPS = (
     'allauth.account',  # registration
     'allauth.socialaccount',  # registration
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
+    'rest_auth',
 )
 
 # Apps specific for this project go here.
@@ -280,3 +284,29 @@ ADMIN_URL = r'^admin/'
 
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+}
+
+REST_USE_JWT = True
+
+JWT_ALLOW_REFRESH  = True
+
+JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=60*60)
+
+JWT_REFRESH_EXPIRATION_DELTA = datetime.timedelta(days=7)
+
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60*60),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}

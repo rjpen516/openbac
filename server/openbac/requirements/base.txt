@@ -51,3 +51,5 @@ django-filter
 
 
 # Your custom requirements go here
+
+pika

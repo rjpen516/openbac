@@ -16,6 +16,8 @@ from openbac.bac.models import Event, Relay, Action, Cardholder
 
 from django.utils.crypto import get_random_string
 
+import pika
+
 # Create your views here.
 
 class Auth_request(APIView):
@@ -33,7 +35,7 @@ class Auth_request(APIView):
             parsed_data = serializer.data
             card_id = parsed_data['card_id']
 
-            if parsed_data['piv_token_signed']: #TODO - check to see if the reader is PIV enabled, if so we should force PIV for the transation. 
+            if parsed_data['piv_token_signed']: #TODO - check to see if the reader is PIV enabled, if so we should force PIV for the transation.
                 print "We got a PIV card, use public key to verify rather than card id"
 
             try:
@@ -52,6 +54,16 @@ class Auth_request(APIView):
                 #call rabitmq to notify our relay with the token
                 print("Notifing %s with token %s"%(event.relay, token))
 
+                connection = pika.BlockingConnection(pika.ConnectionParameters(
+               'localhost'))
+                channel = connection.channel()
+                rabbitmq_relay_queue = 'relay-' + str(Relay.objects.get(paired_reader=request.user.reader.id).id)
+                channel.queue_declare(queue=rabbitmq_relay_queue)
+                channel.basic_publish(exchange='',
+                      routing_key=rabbitmq_relay_queue,
+                      body=token)
+                connection.close()
+
 
                 return_data = ResponseSerializer(data={'auth_decision': True, 'led_color': "green"})
             else:
@@ -66,6 +78,7 @@ class Auth_request(APIView):
 
             return_data.is_valid()
             return Response(return_data.data, status=status.HTTP_202_ACCEPTED)
+        return Response('', status=status.HTTP_400_BAD_REQUEST)
 
 
 class Relay_ack(APIView):
